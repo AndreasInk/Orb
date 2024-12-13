@@ -8,7 +8,7 @@ import SwiftUI
 import SpriteKit
 
 class ParticleScene: SKScene {
-    let color: UIColor
+    let color: Color
     let speedRange: ClosedRange<Double>
     let sizeRange: ClosedRange<CGFloat>
     let particleCount: Int
@@ -16,7 +16,7 @@ class ParticleScene: SKScene {
     
     init(
         size: CGSize,
-        color: UIColor,
+        color: Color,
         speedRange: ClosedRange<Double>,
         sizeRange: ClosedRange<CGFloat>,
         particleCount: Int,
@@ -41,11 +41,16 @@ class ParticleScene: SKScene {
         let emitter = SKEmitterNode()
         
         // Create a white particle texture
+        #if os(iOS)
         emitter.particleTexture = createParticleTexture()
-        
+        #endif
         // Update color properties
         emitter.particleColorSequence = nil
-        emitter.particleColor = color
+#if os(macOS)
+        emitter.particleColor = NSColor(color)
+        #else
+        emitter.particleColor = UIColor(color)
+        #endif
         emitter.particleColorBlendFactor = 1.0
         
         // Basic emitter properties
@@ -110,6 +115,7 @@ class ParticleScene: SKScene {
         addChild(emitter)
     }
     
+#if os(iOS)
     private func createParticleTexture() -> SKTexture {
         let size = CGSize(width: 8, height: 8)  // Smaller size for better performance
         let renderer = UIGraphicsImageRenderer(size: size)
@@ -123,6 +129,7 @@ class ParticleScene: SKScene {
         
         return SKTexture(image: image)
     }
+    #endif
 }
 
 struct ParticlesView: View {
@@ -135,7 +142,7 @@ struct ParticlesView: View {
     var scene: SKScene {
         let scene = ParticleScene(
             size: CGSize(width: 300, height: 300), // Use fixed size
-            color: UIColor(color),
+            color: color,
             speedRange: speedRange,
             sizeRange: sizeRange,
             particleCount: particleCount,
